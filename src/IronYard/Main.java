@@ -9,6 +9,9 @@ public class Main {
     static boolean cantStop = false;
     static boolean crashOnce = false;
 
+
+
+
     static ArrayList<ArrayList<Room>> createRooms() {
         ArrayList<ArrayList<Room>> rooms = new ArrayList<>();
         for (int row = 0; row < SIZE; row++) {
@@ -37,7 +40,7 @@ public class Main {
         } catch (Exception e) {}
 
         neighbors = neighbors.stream()
-                .filter(room -> !room.wasVisited)
+                .filter(room -> { return !room.wasVisited;})
                 .collect(Collectors.toCollection(ArrayList<Room>::new));
         return neighbors;
     }
@@ -77,6 +80,7 @@ public class Main {
             room.isStart = true;
             cantStop = true;
         }
+        room.wasVisited = true;
         Room nextRoom = randomNeighbor(rooms, room.row, room.col);
         if (nextRoom == null) {
             return false;
