@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 public class Main {
     static final int SIZE = 10;
+    static boolean cantStop = false;
+    static boolean crashOnce = false;
 
     static ArrayList<ArrayList<Room>> createRooms() {
         ArrayList<ArrayList<Room>> rooms = new ArrayList<>();
@@ -21,18 +23,22 @@ public class Main {
 
     static ArrayList<Room> possibleNeighbors(ArrayList<ArrayList<Room>> rooms, int row, int col) {
         ArrayList<Room> neighbors = new ArrayList<>();
-
-        if (row > 0) neighbors.add(rooms.get(row-1).get(col));
-        if (row < SIZE -1) neighbors.add(rooms.get(row +1).get(col));
-        if (col > 0) neighbors.add(rooms.get(row).get(col -1));
-        if (col < SIZE -1) neighbors.add(rooms.get(row).get(col +1));
+        try {
+            neighbors.add(rooms.get(row - 1).get(col));
+        } catch (Exception e) {}
+        try {
+            neighbors.add(rooms.get(row + 1).get(col));
+        } catch (Exception e) {}
+        try {
+            neighbors.add(rooms.get(row).get(col - 1));
+        } catch (Exception e) {}
+        try {
+            neighbors.add(rooms.get(row).get(col + 1));
+        } catch (Exception e) {}
 
         neighbors = neighbors.stream()
-                .filter(room -> {
-                    return !room.wasVisited;
-                })
+                .filter(room -> !room.wasVisited)
                 .collect(Collectors.toCollection(ArrayList<Room>::new));
-
         return neighbors;
     }
 
@@ -43,6 +49,10 @@ public class Main {
             Random r = new Random();
             int index = r.nextInt(neighbors.size());
             return neighbors.get(index);
+        }
+        if (!crashOnce) {
+            rooms.get(row).get(col).isEnd = true;
+            crashOnce = true;
         }
         return null;
     }
@@ -63,7 +73,10 @@ public class Main {
     }
 
     static boolean createMaze(ArrayList<ArrayList<Room>> rooms, Room room) {
-        room.wasVisited = true;
+        if (!cantStop) {
+            room.isStart = true;
+            cantStop = true;
+        }
         Room nextRoom = randomNeighbor(rooms, room.row, room.col);
         if (nextRoom == null) {
             return false;
@@ -83,11 +96,16 @@ public class Main {
 	for (ArrayList<Room> row : rooms) {
 	    System.out.print("|");
 	    for (Room room : row) {
-	        if(room.hasBottom) {
+	        if (room.isStart) {
+	            System.out.print("o");
+            } else if (room.isEnd){
+	            System.out.print("x");
+            }else if(room.hasBottom) {
 	            System.out.print("_");
             } else {
 	            System.out.print(" ");
             }
+
             if (room.hasRight) {
 	            System.out.print("|");
             } else {
